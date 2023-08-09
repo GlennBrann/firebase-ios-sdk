@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import Foundation
+import UniformTypeIdentifiers
 #if os(iOS) || os(tvOS)
   import MobileCoreServices
 #elseif os(macOS) || os(watchOS)
@@ -71,20 +72,14 @@ class StorageUtils {
   }
 
   internal class func MIMETypeForExtension(_ fileExtension: String?) -> String {
-    guard let fileExtension = fileExtension else {
-      return "application/octet-stream"
-    }
-
-    if let type = UTTypeCreatePreferredIdentifierForTag(
-      kUTTagClassFilenameExtension,
-      fileExtension as NSString,
-      nil
-    )?.takeRetainedValue() {
-      if let mimeType = UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType)?
-        .takeRetainedValue() {
-        return mimeType as String
+      guard let fileExtension = fileExtension else {
+        return "application/octet-stream"
       }
-    }
-    return "application/octet-stream"
+      if let uttype = UTType(filenameExtension: fileExtension) {
+        if let mimeType = uttype.preferredMIMEType {
+          return mimeType
+        }
+      }
+      return "application/octet-stream"
   }
 }
